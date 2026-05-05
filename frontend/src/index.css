@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    @apply bg-slate-50 text-ink-800 font-sans;
+  }
+  ::selection {
+    @apply bg-brand-200 text-brand-900;
+  }
+}
+
+@layer components {
+  .field-label {
+    @apply mb-1.5 block text-sm font-medium text-ink-800;
+  }
+  .field-label .req {
+    @apply text-brand-700 ml-0.5 font-bold;
+  }
+  .field-input {
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm
+      placeholder:text-slate-400
+      focus:border-brand-600 focus:ring-2 focus:ring-brand-500/25 focus:outline-none
+      transition disabled:bg-slate-100 disabled:text-slate-500;
+  }
+  .field-input.error {
+    @apply border-blue-400 focus:border-blue-500 focus:ring-blue-500/25;
+  }
+  .field-help {
+    @apply mt-1 text-xs text-slate-500;
+  }
+  .field-error {
+    @apply mt-1 text-xs font-medium text-blue-700;
+  }
+  .card {
+    @apply rounded-2xl bg-white shadow-soft border border-brand-100/60;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5
+      text-sm font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-brand-700 text-white shadow-sm
+      hover:bg-brand-800 active:bg-brand-900
+      focus:outline-none focus:ring-2 focus:ring-brand-500/35;
+  }
+  .btn-ghost {
+    @apply btn bg-white text-ink-800 border border-slate-300
+      hover:bg-brand-50 hover:border-brand-200 hover:text-brand-700;
+  }
+  .pill {
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+}
+
+input[type="file"]::file-selector-button {
+  @apply mr-3 cursor-pointer rounded-md border-0 bg-brand-50 px-3 py-1.5
+    text-xs font-semibold text-brand-700 hover:bg-brand-100;
+}
