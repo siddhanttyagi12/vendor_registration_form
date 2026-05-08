@@ -7,7 +7,7 @@ import Declaration from './Declaration.jsx';
 import { Field, Select, YesNo, FileField, Textarea } from './Field.jsx';
 import {
   PAN_RE, GSTIN_RE, IFSC_RE, MOBILE_RE, PIN_RE, EMAIL_RE,
-  ENTITY_TYPES, COUNTRIES, STATES,
+  ENTITY_TYPES, MSME_TYPES, COUNTRIES, STATES, entityTypeFromPan,
 } from '../lib/validators.js';
 import { submitVendor } from '../lib/api.js';
 
@@ -16,10 +16,12 @@ const initialForm = {
   pan: '', aadhaar_linked_with_pan: null,
   has_gst: null, gstin: '', e_invoicing_applicable: null,
   cin: '', entity_type: '',
+  is_proprietor: false,
+  proprietor_first_name: '', proprietor_last_name: '',
   itr_filed_last_2_years: null,
   itr_ack_year_minus_1: '', itr_ack_year_minus_2: '',
   // msme
-  msme_registered: null, udyam_number: '',
+  msme_registered: null, msme_type: '', udyam_number: '',
   // declarations (only required when corresponding registration = No)
   non_gst_declaration_accepted: false,
   non_msme_declaration_accepted: false,
@@ -112,8 +114,14 @@ export default function VendorForm({ onSuccess }) {
       if (!form.itr_ack_year_minus_1) errs.itr_ack_year_minus_1 = 'Required';
       if (!form.itr_ack_year_minus_2) errs.itr_ack_year_minus_2 = 'Required';
     }
+    if (form.is_proprietor) {
+      if (!form.proprietor_first_name) errs.proprietor_first_name = 'Required';
+      if (!form.proprietor_last_name) errs.proprietor_last_name = 'Required';
+    }
     if (form.msme_registered === true && !form.udyam_number)
       errs.udyam_number = 'Required when MSME registered';
+    if (form.msme_registered === true && !form.msme_type)
+      errs.msme_type = 'Required when MSME registered';
     if (form.has_gst === false && !form.non_gst_declaration_accepted)
       errs.non_gst_declaration_accepted = 'You must accept the NON-GST declaration';
     if (form.msme_registered === false && !form.non_msme_declaration_accepted)
@@ -175,7 +183,11 @@ export default function VendorForm({ onSuccess }) {
           <Field
             label="PAN Number" name="pan" required
             value={form.pan}
-            onChange={(v) => set('pan')(v.toUpperCase())}
+            onChange={(v) => {
+              const up = v.toUpperCase();
+              const derived = entityTypeFromPan(up);
+              update(derived ? { pan: up, entity_type: derived } : { pan: up });
+            }}
             placeholder="ABCDE1234F"
             maxLength={10}
             error={errors.pan}
@@ -219,7 +231,6 @@ export default function VendorForm({ onSuccess }) {
             <Declaration
               title="NON-GST Declaration"
               subject="GST Act"
-              vendorName={form.vendor_name}
               accepted={form.non_gst_declaration_accepted}
               onChange={set('non_gst_declaration_accepted')}
               error={errors.non_gst_declaration_accepted}
@@ -248,6 +259,42 @@ export default function VendorForm({ onSuccess }) {
             options={ENTITY_TYPES}
             error={errors.entity_type}
           />
+
+          <div className="md:col-span-2">
+            <label className="inline-flex items-center gap-2 text-sm text-ink-800">
+              <input
+                type="checkbox"
+                checked={form.is_proprietor}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  update(
+                    checked
+                      ? { is_proprietor: true }
+                      : { is_proprietor: false, proprietor_first_name: '', proprietor_last_name: '' }
+                  );
+                }}
+                className="h-4 w-4 rounded border-slate-300 text-brand-700 focus:ring-brand-700"
+              />
+              is Proprietor
+            </label>
+          </div>
+
+          {form.is_proprietor && (
+            <>
+              <Field
+                label="First Name" name="proprietor_first_name" required
+                value={form.proprietor_first_name}
+                onChange={set('proprietor_first_name')}
+                error={errors.proprietor_first_name}
+              />
+              <Field
+                label="Last Name" name="proprietor_last_name" required
+                value={form.proprietor_last_name}
+                onChange={set('proprietor_last_name')}
+                error={errors.proprietor_last_name}
+              />
+            </>
+          )}
 
           <YesNo
             label="ITR filed for previous 2 years" name="itr_filed_last_2_years" required
@@ -302,6 +349,15 @@ export default function VendorForm({ onSuccess }) {
             />
           )}
           {showMsmeFields && (
+            <Select
+              label="MSME Type" name="msme_type" required
+              value={form.msme_type}
+              onChange={set('msme_type')}
+              options={MSME_TYPES}
+              error={errors.msme_type}
+            />
+          )}
+          {showMsmeFields && (
             <FileField
               label="MSME Certificate"
               required
@@ -316,7 +372,6 @@ export default function VendorForm({ onSuccess }) {
             <Declaration
               title="NON-MSME Declaration"
               subject="MSME Act"
-              vendorName={form.vendor_name}
               accepted={form.non_msme_declaration_accepted}
               onChange={set('non_msme_declaration_accepted')}
               error={errors.non_msme_declaration_accepted}

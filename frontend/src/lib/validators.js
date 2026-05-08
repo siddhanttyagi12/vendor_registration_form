@@ -5,18 +5,16 @@ export const MOBILE_RE = /^[6-9][0-9]{9}$/;
 export const PIN_RE = /^[1-9][0-9]{5}$/;
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export const ENTITY_TYPES = [
-  'Proprietorship',
-  'Partnership',
-  'LLP',
-  'Private Limited',
-  'Public Limited',
-  'HUF',
-  'Trust',
-  'Society',
-  'Government Department',
-  'Other',
-];
+export const ENTITY_TYPES = ['Individual', 'Company'];
+
+export function entityTypeFromPan(pan) {
+  if (!pan || pan.length < 4) return '';
+  const c = pan[3].toUpperCase();
+  if (c === 'H' || c === 'P') return 'Individual';
+  return 'Company';
+}
+
+export const MSME_TYPES = ['Micro', 'Small', 'Medium'];
 
 export const COUNTRIES = ['India', 'Other'];
 

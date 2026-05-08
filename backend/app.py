@@ -110,6 +110,9 @@ class VendorPayload(BaseModel):
     e_invoicing_applicable: bool
     cin: Optional[str] = None
     entity_type: str
+    is_proprietor: bool = False
+    proprietor_first_name: Optional[str] = None
+    proprietor_last_name: Optional[str] = None
     itr_filed_last_2_years: bool
     itr_ack_year_minus_1: Optional[str] = None
     itr_ack_year_minus_2: Optional[str] = None
@@ -117,6 +120,7 @@ class VendorPayload(BaseModel):
     # MSME
     msme_registered: bool
     udyam_number: Optional[str] = None
+    msme_type: Optional[str] = None
 
     # Declarations (true only when user ticked the corresponding checkbox)
     non_gst_declaration_accepted: bool = False
@@ -164,8 +168,15 @@ def _validate_payload(p: VendorPayload) -> list[str]:
     if p.itr_filed_last_2_years:
         if not p.itr_ack_year_minus_1 or not p.itr_ack_year_minus_2:
             errs.append("ITR acknowledgement numbers required for both years")
+    if p.is_proprietor:
+        if not p.proprietor_first_name:
+            errs.append("First name required when type is proprietor")
+        if not p.proprietor_last_name:
+            errs.append("Last name required when type is proprietor")
     if p.msme_registered and not p.udyam_number:
         errs.append("Udyam number required when MSME registered")
+    if p.msme_registered and p.msme_type not in ("Micro", "Small", "Medium"):
+        errs.append("MSME type must be Micro, Small, or Medium when MSME registered")
     # Declarations are required when the corresponding registration is absent
     if not p.gstin and not p.non_gst_declaration_accepted:
         errs.append("NON-GST declaration must be accepted when GST is not registered")

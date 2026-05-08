@@ -5,13 +5,11 @@
 export default function Declaration({
   title,
   subject,        // "GST Act" | "MSME Act"
-  vendorName,     // string for the {NAME OF THE COMPANY} placeholder
   accepted,
   onChange,
   error,
   downloadHref,
 }) {
-  const company = vendorName?.trim() || '[your company name]';
   return (
     <div className="md:col-span-2">
       <div
@@ -41,10 +39,7 @@ export default function Declaration({
         <div className="rounded-lg bg-white/70 p-4 text-sm leading-relaxed text-ink-800">
           <p className="mb-2 text-slate-500 text-xs">To: The Management, Shiprocket Pvt. Ltd</p>
           <p>
-            We <span className="rounded bg-brand-50 px-1 font-semibold text-brand-800">
-              {company}
-            </span>{' '}
-            hereby declare that we are <strong>not registered</strong> under the {subject}.
+            We hereby declare that we are <strong>not registered</strong> under the {subject}.
           </p>
           <p className="mt-2">
             We further assure that, if in future we get registered under the {subject},
